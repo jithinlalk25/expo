@@ -7,7 +7,11 @@ public final class VideoModule: Module {
     Name("ExpoVideo")
 
     Function("isPictureInPictureSupported") {
-      return AVPictureInPictureController.isPictureInPictureSupported()
+      if #available(iOS 13.4, tvOS 14.0, *) {
+        return AVPictureInPictureController.isPictureInPictureSupported()
+      } else {
+        return false
+      }
     }
 
     View(VideoView.self) {
@@ -40,11 +44,15 @@ public final class VideoModule: Module {
       }
 
       Prop("allowsFullscreen") { (view, allowsFullscreen: Bool?) in
+        #if !os(tvOS)
         view.playerViewController.setValue(allowsFullscreen ?? true, forKey: "allowsEnteringFullScreen")
+        #endif
       }
 
       Prop("showsTimecodes") { (view, showsTimecodes: Bool?) in
+        #if !os(tvOS)
         view.playerViewController.showsTimecodes = showsTimecodes ?? true
+        #endif
       }
 
       Prop("requiresLinearPlayback") { (view, requiresLinearPlayback: Bool?) in
@@ -56,7 +64,9 @@ public final class VideoModule: Module {
       }
 
       Prop("startsPictureInPictureAutomatically") { (view, startsPictureInPictureAutomatically: Bool?) in
+        #if !os(tvOS)
         view.startPictureInPictureAutomatically = startsPictureInPictureAutomatically ?? false
+        #endif
       }
 
       AsyncFunction("enterFullscreen") { view in

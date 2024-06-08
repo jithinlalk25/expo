@@ -14,6 +14,9 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
 
   var isFullscreen: Bool = false
   var isInPictureInPicture = false
+  #if os(tvOS)
+  let startPictureInPictureAutomatically = false
+  #else
   var startPictureInPictureAutomatically = false {
     didSet {
       if #available(iOS 14.2, *) {
@@ -21,12 +24,15 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
       }
     }
   }
+  #endif
 
   var allowPictureInPicture: Bool = false {
     didSet {
       // PiP requires `.playback` audio session category in `.moviePlayback` mode
-      VideoManager.shared.setAppropriateAudioSessionOrWarn()
-      playerViewController.allowsPictureInPicturePlayback = allowPictureInPicture
+      if #available(iOS 13.4, tvOS 14.0, *) {
+        VideoManager.shared.setAppropriateAudioSessionOrWarn()
+          playerViewController.allowsPictureInPicturePlayback = allowPictureInPicture
+      }
     }
   }
 
@@ -40,7 +46,11 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
   }
 
   lazy var supportsPictureInPicture: Bool = {
-    return AVPictureInPictureController.isPictureInPictureSupported()
+    if #available(iOS 13.4, tvOS 14.0, *) {
+      return AVPictureInPictureController.isPictureInPictureSupported()
+    } else {
+      return false
+    }
   }()
 
   public required init(appContext: AppContext? = nil) {
@@ -53,7 +63,9 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
     playerViewController.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
     playerViewController.view.backgroundColor = .clear
     // Now playing is managed by the `NowPlayingManager`
+    #if !os(tvOS)
     playerViewController.updatesNowPlayingInfoCenter = false
+    #endif
 
     addSubview(playerViewController.view)
   }
@@ -110,6 +122,7 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
 
   // MARK: - AVPlayerViewControllerDelegate
 
+  #if !os(tvOS)
   public func playerViewController(
     _ playerViewController: AVPlayerViewController,
     willBeginFullScreenPresentationWithAnimationCoordinator coordinator: UIViewControllerTransitionCoordinator
@@ -134,6 +147,7 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
       }
     }
   }
+  #endif
 
   public func playerViewControllerDidStartPictureInPicture(_ playerViewController: AVPlayerViewController) {
     isInPictureInPicture = true
