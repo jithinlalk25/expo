@@ -9,9 +9,8 @@ public final class VideoModule: Module {
     Function("isPictureInPictureSupported") {
       if #available(iOS 13.4, tvOS 14.0, *) {
         return AVPictureInPictureController.isPictureInPictureSupported()
-      } else {
-        return false
       }
+      return false
     }
 
     View(VideoView.self) {

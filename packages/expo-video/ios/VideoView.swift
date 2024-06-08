@@ -48,9 +48,8 @@ public final class VideoView: ExpoView, AVPlayerViewControllerDelegate {
   lazy var supportsPictureInPicture: Bool = {
     if #available(iOS 13.4, tvOS 14.0, *) {
       return AVPictureInPictureController.isPictureInPictureSupported()
-    } else {
-      return false
     }
+    return false
   }()
 
   public required init(appContext: AppContext? = nil) {
